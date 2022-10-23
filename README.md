@@ -1,4 +1,4 @@
-# RaspberryPi-Smart-CAr
+# RaspberryPi-Smart-Car
 ## Bachelor Degree Project
 
 ### Tasks Backlog
