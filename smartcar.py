@@ -1,43 +1,82 @@
 import sys
 import RPi.GPIO as GPIO
 import time
+from enum import Enum
 
-MOTOR_A_EN = 33
-MOTOR_A_IN1 = 31
-MOTOR_A_IN2 = 29
+class USED_PINS:
+    MOTOR_A_EN = 33
+    MOTOR_A_IN1 = 31
+    MOTOR_A_IN2 = 29
 
-MOTOR_B_EN = 32
-MOTOR_B_IN1 = 40
-MOTOR_B_IN2 = 38
+    MOTOR_B_EN = 32
+    MOTOR_B_IN1 = 40
+    MOTOR_B_IN2 = 38
 
-def init_GPIO():
+class CAR_DIRECTION(Enum):
+    FRONT = 0
+    BACK = 1
+    LEFT = 2
+    RIGHT = 3
+
+def GPIO_init():
     GPIO.setmode(GPIO.BOARD)
     GPIO.setwarnings(False)
-    GPIO.setup(MOTOR_A_EN, GPIO.OUT)
-    GPIO.setup(MOTOR_A_IN1, GPIO.OUT)
-    GPIO.setup(MOTOR_A_IN2, GPIO.OUT)
-    GPIO.setup(MOTOR_B_EN, GPIO.OUT)
-    GPIO.setup(MOTOR_B_IN1, GPIO.OUT)
-    GPIO.setup(MOTOR_B_IN2, GPIO.OUT)
+    GPIO.setup(USED_PINS.MOTOR_A_EN, GPIO.OUT)
+    GPIO.setup(USED_PINS.MOTOR_A_IN1, GPIO.OUT)
+    GPIO.setup(USED_PINS.MOTOR_A_IN2, GPIO.OUT)
+    GPIO.setup(USED_PINS.MOTOR_B_EN, GPIO.OUT)
+    GPIO.setup(USED_PINS.MOTOR_B_IN1, GPIO.OUT)
+    GPIO.setup(USED_PINS.MOTOR_B_IN2, GPIO.OUT)
 
-def run():
-    init_GPIO()
+def motor_controller(direction):
+    GPIO_init()
 
-    GPIO.output(MOTOR_A_EN, GPIO.HIGH)
-    GPIO.output(MOTOR_A_IN1, GPIO.HIGH)
-    GPIO.output(MOTOR_A_IN2, GPIO.LOW)
+    GPIO.output(USED_PINS.MOTOR_A_EN, GPIO.HIGH)
+    GPIO.output(USED_PINS.MOTOR_B_EN, GPIO.HIGH)
+    
+    if direction == CAR_DIRECTION.FRONT:
+        GPIO.output(USED_PINS.MOTOR_A_IN1, GPIO.HIGH)
+        GPIO.output(USED_PINS.MOTOR_A_IN2, GPIO.LOW)
+        GPIO.output(USED_PINS.MOTOR_B_IN1, GPIO.HIGH)
+        GPIO.output(USED_PINS.MOTOR_B_IN2, GPIO.LOW)
+    elif direction == CAR_DIRECTION.BACK:
+        GPIO.output(USED_PINS.MOTOR_A_IN1, GPIO.LOW)
+        GPIO.output(USED_PINS.MOTOR_A_IN2, GPIO.HIGH)
+        GPIO.output(USED_PINS.MOTOR_B_IN1, GPIO.LOW)
+        GPIO.output(USED_PINS.MOTOR_B_IN2, GPIO.HIGH)
+    elif direction == CAR_DIRECTION.LEFT:
+        GPIO.output(USED_PINS.MOTOR_A_IN1, GPIO.LOW)
+        GPIO.output(USED_PINS.MOTOR_A_IN2, GPIO.LOW)
+        GPIO.output(USED_PINS.MOTOR_B_IN1, GPIO.HIGH)
+        GPIO.output(USED_PINS.MOTOR_B_IN2, GPIO.LOW)
+    elif direction == CAR_DIRECTION.RIGHT:
+        GPIO.output(USED_PINS.MOTOR_A_IN1, GPIO.HIGH)
+        GPIO.output(USED_PINS.MOTOR_A_IN2, GPIO.LOW)
+        GPIO.output(USED_PINS.MOTOR_B_IN1, GPIO.LOW)
+        GPIO.output(USED_PINS.MOTOR_B_IN2, GPIO.LOW)
 
-    GPIO.output(MOTOR_B_EN, GPIO.HIGH)
-    GPIO.output(MOTOR_B_IN1, GPIO.HIGH)
-    GPIO.output(MOTOR_B_IN2, GPIO.LOW)
+def front():
+    motor_controller(CAR_DIRECTION.FRONT)
+
+def back():
+    motor_controller(CAR_DIRECTION.BACK)
+
+def right():
+    motor_controller(CAR_DIRECTION.RIGHT)
+
+def left():
+    motor_controller(CAR_DIRECTION.LEFT)
 
 def stop():
-    init_GPIO()
+    GPIO_init()
     GPIO.cleanup()
 
 commands = {
-    "run" : run,
-    "stop" : stop,
+    "front" : front,
+    "back" : back,
+    "left" : left,
+    "right" : right,
+    "stop": stop,
 }
 
 def main():
@@ -62,6 +101,7 @@ def main():
 
     except Exception as exception:
         print(exception)
+    
 
 if __name__ == "__main__":
     main()
