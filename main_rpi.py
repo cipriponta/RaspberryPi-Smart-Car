@@ -19,9 +19,9 @@ def main():
                 break
 
     while True:
-        # frame = image_processor.return_frame()
-        # if args.debug:
-        #     video_streamer.send_data(frame)
+        frame = image_processor.return_frame()
+        if args.debug:
+            video_streamer.send_data(frame)
         pass
 
     if args.debug:
