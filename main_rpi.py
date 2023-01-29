@@ -22,6 +22,10 @@ def main():
         # frame = image_processor.return_frame()
         # if args.debug:
         #     video_streamer.send_data(frame)
+        pass
+
+    if args.debug:
+        video_streamer.close()
 
 if __name__ == "__main__":
     main()

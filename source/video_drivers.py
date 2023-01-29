@@ -49,7 +49,7 @@ class VideoReceiver:
     def connect(self):
         self.client_socket.connect(self.client_socket_address)
 
-    def receive_data(self):
+    def display_data(self):
         data = b""
         payload_size = struct.calcsize("Q")
 
@@ -72,3 +72,6 @@ class VideoReceiver:
             frame = pickle.loads(frame_data)
 
             cv2.imshow("Debug", frame)
+
+    def close(self):
+        self.client_socket.close()
