@@ -19,21 +19,23 @@ class VideoStreamer:
         self.server_socket.listen(5)
         print("Listening at: ", self.socket_address)
 
-    def search_for_clients(self):
-        self.client_socket, self.client_address = self.server_socket.accept()
-        print("Connection received from: ", self.client_address)
-
     def is_client_connected(self):
         if self.client_socket:
             return True
         else:
             return False
 
-    def send_data(self, frame):
+    def search_for_clients(self):
+        while True:
+            self.client_socket, self.client_address = self.server_socket.accept()
+            print("Connection received from: ", self.client_address)
+            if self.is_client_connected():
+                break
+
+    def send_frame(self, frame):
+        # To be modified
         if self.is_client_connected():
-            data = pickle.dumps(frame)
-            message = struct.pack("Q", len(data)) + data
-            self.client_socket.sendall(message)
+            self.client_socket.sendall(frame)
     
     def close(self):
         if self.is_client_connected():
@@ -49,29 +51,10 @@ class VideoReceiver:
     def connect(self):
         self.client_socket.connect(self.client_socket_address)
 
-    def display_data(self):
-        data = b""
-        payload_size = struct.calcsize("Q")
-
-        while True:
-            while len(data) < payload_size:
-                packet = self.client_socket.recv(4 * 1024)
-                if not packet:
-                    break
-                data += packet
-            
-            packed_msg_size = data[:payload_size]
-            data = data[payload_size:]
-            msg_size = struct.unpack("Q", packed_msg_size)[0]
-
-            while len(data) < msg_size:
-                data += self.client_socket.recv(4 * 1024)
-
-            frame_data = data[:msg_size]
-            data = data[msg_size:]
-            frame = pickle.loads(frame_data)
-
-            cv2.imshow("Debug", frame)
+    def display_frame(self):
+        # To be modified
+        data = self.client_socket.recv(4 * 1024)
+        print(data)
 
     def close(self):
         self.client_socket.close()
