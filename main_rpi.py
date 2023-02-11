@@ -1,4 +1,5 @@
 import argparse
+import time
 from drivers.image_processing_drivers import ImageProcessor
 
 def main():
@@ -16,6 +17,7 @@ def main():
     try:
         for frame in image_processor.camera.capture_continuous(image_processor.raw_capture, format = "bgr"):
             processed_frame = image_processor.process_frame(frame)
+            time.sleep(1)
   
     finally:
         image_processor.close()   

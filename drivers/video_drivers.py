@@ -35,7 +35,7 @@ class VideoStreamer:
     def send_frame(self, frame):
         # To be modified
         if self.is_client_connected():
-            self.client_socket.sendall(frame)
+            self.client_socket.send(frame)
     
     def close(self):
         if self.is_client_connected():
@@ -51,10 +51,11 @@ class VideoReceiver:
     def connect(self):
         self.client_socket.connect(self.client_socket_address)
 
-    def display_frame(self):
+    def display_frames(self):
         # To be modified
-        data = self.client_socket.recv(4 * 1024)
-        print(data.decode("utf-8"))
+        while True:
+            data = self.client_socket.recv(4 * 1024)
+            print(data.decode("utf-8"))
 
     def close(self):
         self.client_socket.close()
