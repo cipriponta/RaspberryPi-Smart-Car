@@ -54,7 +54,7 @@ class VideoReceiver:
     def display_frame(self):
         # To be modified
         data = self.client_socket.recv(4 * 1024)
-        print(data)
+        print(data.decode("utf-8"))
 
     def close(self):
         self.client_socket.close()

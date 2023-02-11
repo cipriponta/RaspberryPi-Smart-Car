@@ -13,10 +13,12 @@ def main():
 
     image_processor = ImageProcessor(is_debug)   
 
-    for frame in image_processor.camera.capture_continuous(image_processor.raw_capture, format = "bgr"):
-        processed_frame = image_processor.process_frame(frame)
-
-    image_processor.close()        
+    try:
+        for frame in image_processor.camera.capture_continuous(image_processor.raw_capture, format = "bgr"):
+            processed_frame = image_processor.process_frame(frame)
+  
+    finally:
+        image_processor.close()   
 
 if __name__ == "__main__":
     main()

@@ -33,7 +33,7 @@ class ImageProcessor:
         processed_frame = None
 
         if self.is_debug:
-            self.video_streamer.send_frame(frame)
+            self.video_streamer.send_frame(bytes("Hello"))
 
         return processed_frame
 
