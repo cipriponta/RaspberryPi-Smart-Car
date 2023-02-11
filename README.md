@@ -10,5 +10,5 @@
 6. [X] Create a python class for image processing
 7. [ ] Create a python class for the motors controller 
 8. [X] Access the rpi physically and test if the camera can display video in real time
-9. [ ] Establish a client server connection between rpi and pc
+9. [X] Establish a client server connection between rpi and pc
 10. [ ] Stream video to pc 
