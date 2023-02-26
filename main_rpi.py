@@ -20,7 +20,8 @@ def main():
         while True:
             processed_frame = image_processor.get_processed_frame()
             time.sleep(LOOP_DELAY)
-  
+    except (BrokenPipeError, ConnectionResetError):
+        print("The connection has been closed by the client")
     finally:
         image_processor.close()   
 

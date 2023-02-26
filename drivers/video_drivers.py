@@ -17,7 +17,7 @@ class VideoStreamer:
     def connect(self):
         self.server_socket.bind(self.socket_address)
         self.server_socket.listen(5)
-        print("Listening at: ", self.socket_address)
+        print("Listening at:", self.socket_address)
 
     def is_client_connected(self):
         if self.client_socket:
@@ -28,7 +28,7 @@ class VideoStreamer:
     def search_for_clients(self):
         while True:
             self.client_socket, self.client_address = self.server_socket.accept()
-            print("Connection received from: ", self.client_address)
+            print("Connection received from:", self.client_address)
             if self.is_client_connected():
                 break
 

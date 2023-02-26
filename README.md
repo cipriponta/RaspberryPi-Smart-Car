@@ -13,4 +13,4 @@
 9.  [X] Establish a client server connection between rpi and pc
 10. [X] Stream video to pc 
 11. [ ] Try to create timer interrupts
-12. [ ] Create a config.json for storing constant variables
+12. [ ] Create a config class for storing constant variables

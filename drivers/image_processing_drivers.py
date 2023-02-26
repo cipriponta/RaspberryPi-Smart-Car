@@ -6,7 +6,7 @@ import cv2
 from drivers.video_drivers import VideoStreamer
 
 CAMERA_RESOLUTION = (640, 480)
-CAMERA_FRAMERATE = 32
+CAMERA_FRAMERATE = 60
 
 class ImageProcessor:
     def __init__(self, is_debug):
