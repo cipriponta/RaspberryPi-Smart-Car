@@ -14,3 +14,4 @@
 10. [X] Stream video to pc 
 11. [ ] Try to create timer interrupts
 12. [ ] Create a config class for storing constant variables
+13. [ ] Speed up socket transmission

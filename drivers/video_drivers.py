@@ -65,7 +65,7 @@ class VideoReceiver:
             message = message[self.payload_size:]
             message_size = struct.unpack("L", packed_message_size)[0]
 
-            # Get message
+            # Get the message
             while len(message) < message_size:
                 message += self.client_socket.recv(4 * 1024)
 
