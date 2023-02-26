@@ -2,6 +2,8 @@ import argparse
 import time
 from drivers.image_processing_drivers import ImageProcessor
 
+LOOP_DELAY = 1
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", help = "Allows real time debugging of the camera input on another machine", action="store_true")
@@ -15,9 +17,9 @@ def main():
     image_processor = ImageProcessor(is_debug)   
 
     try:
-        for frame in image_processor.camera.capture_continuous(image_processor.raw_capture, format = "bgr"):
-            processed_frame = image_processor.process_frame(frame)
-            time.sleep(1)
+        while True:
+            processed_frame = image_processor.get_processed_frame()
+            time.sleep(LOOP_DELAY)
   
     finally:
         image_processor.close()   

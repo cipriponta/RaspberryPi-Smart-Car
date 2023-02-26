@@ -33,9 +33,9 @@ class VideoStreamer:
                 break
 
     def send_frame(self, frame):
-        # To be modified
         if self.is_client_connected():
-            self.client_socket.send(frame)
+            message = pickle.dumps(frame)
+            self.client_socket.sendall(struct.pack("L", len(message)) + message)
     
     def close(self):
         if self.is_client_connected():
@@ -47,15 +47,31 @@ class VideoReceiver:
         self.host_ip = host_ip
         self.port = port
         self.client_socket_address = (self.host_ip, self.port)
+
+        self.payload_size = struct.calcsize("L")
     
     def connect(self):
         self.client_socket.connect(self.client_socket_address)
 
     def display_frames(self):
-        # To be modified
+        message = b""
+
         while True:
-            data = self.client_socket.recv(4 * 1024)
-            print(data.decode("utf-8"))
+            while len(message) < self.payload_size:
+                message += self.client_socket.recv(4 * 1024)
+            
+            packed_message_size = message[:self.payload_size]
+            message = message[self.payload_size:]
+            message_size = struct.unpack("L", packed_message_size)[0]
+
+            while len(message) < message_size:
+                message += self.client_socket.recv(4 * 1024)
+
+            frame_data = message[:message_size]
+            message = message[message_size:]
+
+            frame = pickle.loads(frame_data)
+            print(frame.size)
 
     def close(self):
         self.client_socket.close()

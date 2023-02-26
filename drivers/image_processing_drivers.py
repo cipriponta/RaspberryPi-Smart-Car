@@ -25,15 +25,18 @@ class ImageProcessor:
             self.video_streamer.connect()
             self.video_streamer.search_for_clients()
 
-    def process_frame(self, frame):
+    def get_processed_frame(self):
+        self.camera.capture(self.raw_capture, format="bgr")
+        frame = self.raw_capture.array
+        
         # Clear the stream
         self.raw_capture.truncate(0)
 
         # Frame Processing TBD
-        processed_frame = None
+        processed_frame = frame
 
         if self.is_debug:
-            self.video_streamer.send_frame(bytes("Hello", encoding='utf-8'))
+            self.video_streamer.send_frame(processed_frame)
 
         return processed_frame
 
