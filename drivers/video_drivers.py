@@ -57,6 +57,7 @@ class VideoReceiver:
         message = b""
 
         while True:
+            # Get message size
             while len(message) < self.payload_size:
                 message += self.client_socket.recv(4 * 1024)
             
@@ -64,16 +65,20 @@ class VideoReceiver:
             message = message[self.payload_size:]
             message_size = struct.unpack("L", packed_message_size)[0]
 
+            # Get message
             while len(message) < message_size:
                 message += self.client_socket.recv(4 * 1024)
 
+            # Get frame from message, and display the frame
             frame_data = message[:message_size]
             message = message[message_size:]
-
             frame = pickle.loads(frame_data)
 
             cv2.imshow("Frame", frame)
-            cv2.waitKey(ord('q'))
+            
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
     def close(self):
         self.client_socket.close()
+        cv2.destroyAllWindows()
