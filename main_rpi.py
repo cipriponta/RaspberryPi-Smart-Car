@@ -2,7 +2,7 @@ import argparse
 import time
 from drivers.image_processing_drivers import ImageProcessor
 
-LOOP_DELAY = 1
+LOOP_DELAY = 0.001
 
 def main():
     parser = argparse.ArgumentParser()

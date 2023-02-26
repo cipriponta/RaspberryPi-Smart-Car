@@ -71,7 +71,9 @@ class VideoReceiver:
             message = message[message_size:]
 
             frame = pickle.loads(frame_data)
-            print(frame.size)
+
+            cv2.imshow("Frame", frame)
+            cv2.waitKey(ord('q'))
 
     def close(self):
         self.client_socket.close()
