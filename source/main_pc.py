@@ -1,7 +1,8 @@
 from drivers.video_drivers import VideoReceiver
+from constants import *
 
 def main():
-    video_receiver = VideoReceiver(host_ip = "192.168.0.194", port = 9999)
+    video_receiver = VideoReceiver(host_ip = RPI_IP_ADDRESS, port = RPI_PORT)
 
     try:
         video_receiver.connect()

@@ -2,8 +2,7 @@ import socket
 import pickle
 import struct
 import cv2
-
-RESIZED_DIMENSION = (1080, 720)
+from constants import *
 
 class VideoStreamer:
     def __init__(self, port = 0):
@@ -18,7 +17,7 @@ class VideoStreamer:
 
     def connect(self):
         self.server_socket.bind(self.socket_address)
-        self.server_socket.listen(5)
+        self.server_socket.listen(MAX_CONNECIONS)
         print("Listening at:", self.socket_address)
 
     def is_client_connected(self):
@@ -37,7 +36,7 @@ class VideoStreamer:
     def send_frame(self, frame):
         if self.is_client_connected():
             message = pickle.dumps(frame)
-            self.client_socket.sendall(struct.pack("L", len(message)) + message)
+            self.client_socket.sendall(struct.pack(SEGMENT_FORMAT, len(message)) + message)
     
     def close(self):
         if self.is_client_connected():
@@ -50,7 +49,7 @@ class VideoReceiver:
         self.port = port
         self.client_socket_address = (self.host_ip, self.port)
 
-        self.payload_size = struct.calcsize("L")
+        self.payload_size = struct.calcsize(SEGMENT_FORMAT)
     
     def connect(self):
         self.client_socket.connect(self.client_socket_address)
@@ -61,25 +60,25 @@ class VideoReceiver:
         while True:
             # Get message size
             while len(message) < self.payload_size:
-                message += self.client_socket.recv(4 * 1024)
+                message += self.client_socket.recv(RECEIVED_SEGMENT_SIZE)
             
             packed_message_size = message[:self.payload_size]
             message = message[self.payload_size:]
-            message_size = struct.unpack("L", packed_message_size)[0]
+            message_size = struct.unpack(SEGMENT_FORMAT, packed_message_size)[0]
 
             # Get the message
             while len(message) < message_size:
-                message += self.client_socket.recv(4 * 1024)
+                message += self.client_socket.recv(RECEIVED_SEGMENT_SIZE)
 
             # Get frame from message, and display the frame
             frame_data = message[:message_size]
             message = message[message_size:]
             frame = pickle.loads(frame_data)
 
-            resized_frame = cv2.resize(frame, RESIZED_DIMENSION)
+            resized_frame = cv2.resize(frame, IMAGE_OUTPUT_DIMENSION)
             cv2.imshow("Frame", resized_frame)
             
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if cv2.waitKey(1) & 0xFF == ord(CLOSE_SERVER_KEY):
                 break
 
     def close(self):

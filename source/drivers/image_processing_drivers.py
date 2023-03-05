@@ -2,13 +2,8 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 import time
 import cv2
-
 from drivers.video_drivers import VideoStreamer
-
-CAMERA_RESOLUTION = (320, 240)
-CAMERA_FRAMERATE = 120
-CAMERA_SHUTTER_SPEED = 20000
-CAMERA_ISO = 800
+from constants import *
 
 class ImageProcessor:
     def __init__(self, is_debug):
@@ -17,22 +12,21 @@ class ImageProcessor:
         self.camera = PiCamera()
         self.camera.shutter_speed = CAMERA_SHUTTER_SPEED
         self.camera.iso = CAMERA_ISO
-        print("Exposure speed: ", self.camera.exposure_speed)
-        print("Shutter speed: ", self.camera.shutter_speed)
         self.camera.resolution = CAMERA_RESOLUTION
         self.camera.framerate = CAMERA_FRAMERATE
+
         self.raw_capture = PiRGBArray(self.camera, size = CAMERA_RESOLUTION)
-        time.sleep(0.1)
+        time.sleep(CAMERA_INIT_TIME)
 
         self.video_streamer = None
 
         if self.is_debug == True:
-            self.video_streamer = VideoStreamer(port = 9999)
+            self.video_streamer = VideoStreamer(port = RPI_PORT)
             self.video_streamer.connect()
             self.video_streamer.search_for_clients()
 
     def get_processed_frame(self):
-        self.camera.capture(self.raw_capture, format="bgr")
+        self.camera.capture(self.raw_capture, format = IMAGE_FORMAT_BGR)
         frame = self.raw_capture.array
         
         # Clear the stream

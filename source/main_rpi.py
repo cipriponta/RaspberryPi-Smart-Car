@@ -2,8 +2,7 @@ import argparse
 import time
 from picamera import exc as PiCameraException
 from drivers.image_processing_drivers import ImageProcessor
-
-LOOP_DELAY = 0.001
+from constants import *
 
 def main():
     parser = argparse.ArgumentParser()
