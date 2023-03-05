@@ -1,5 +1,6 @@
 import argparse
 import time
+from picamera import exc as PiCameraException
 from drivers.image_processing_drivers import ImageProcessor
 
 LOOP_DELAY = 0.001
@@ -18,10 +19,16 @@ def main():
 
     try:
         while True:
+            start_time = time.time()
             processed_frame = image_processor.get_processed_frame()
-            time.sleep(LOOP_DELAY)
+            end_time = time.time()
+            print("Process duration: ", end_time - start_time)
+            time.sleep(LOOP_DELAY)  
+
     except (BrokenPipeError, ConnectionResetError):
         print("The connection has been closed by the client")
+    except (PiCameraException.PiCameraValueError, KeyboardInterrupt):
+        print("The connection has been closed by the server")
     finally:
         image_processor.close()   
 

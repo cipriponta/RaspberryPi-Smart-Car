@@ -6,6 +6,8 @@ def main():
     try:
         video_receiver.connect()
         video_receiver.display_frames()
+    except KeyboardInterrupt:
+        print("Connection closed") 
     finally:
         video_receiver.close()
 

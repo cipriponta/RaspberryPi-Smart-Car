@@ -5,14 +5,20 @@ import cv2
 
 from drivers.video_drivers import VideoStreamer
 
-CAMERA_RESOLUTION = (640, 480)
-CAMERA_FRAMERATE = 60
+CAMERA_RESOLUTION = (320, 240)
+CAMERA_FRAMERATE = 120
+CAMERA_SHUTTER_SPEED = 20000
+CAMERA_ISO = 800
 
 class ImageProcessor:
     def __init__(self, is_debug):
         self.is_debug = is_debug
 
         self.camera = PiCamera()
+        self.camera.shutter_speed = CAMERA_SHUTTER_SPEED
+        self.camera.iso = CAMERA_ISO
+        print("Exposure speed: ", self.camera.exposure_speed)
+        print("Shutter speed: ", self.camera.shutter_speed)
         self.camera.resolution = CAMERA_RESOLUTION
         self.camera.framerate = CAMERA_FRAMERATE
         self.raw_capture = PiRGBArray(self.camera, size = CAMERA_RESOLUTION)

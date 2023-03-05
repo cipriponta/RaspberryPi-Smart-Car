@@ -14,4 +14,4 @@
 10. [X] Stream video to pc 
 11. [ ] Try to create timer interrupts
 12. [ ] Create a config class for storing constant variables
-13. [ ] Try to reduce motion blur by increasing the frame rate
+13. [X] Try to reduce motion blur by increasing the frame rate
