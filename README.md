@@ -15,3 +15,4 @@
 11. [ ] Try to create timer interrupts
 12. [ ] Create a config class for storing constant variables
 13. [X] Try to reduce motion blur by increasing the frame rate
+14. [X] Resize output image 

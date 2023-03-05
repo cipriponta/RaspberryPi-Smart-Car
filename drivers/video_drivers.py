@@ -3,6 +3,8 @@ import pickle
 import struct
 import cv2
 
+RESIZED_DIMENSION = (1080, 720)
+
 class VideoStreamer:
     def __init__(self, port = 0):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -74,7 +76,8 @@ class VideoReceiver:
             message = message[message_size:]
             frame = pickle.loads(frame_data)
 
-            cv2.imshow("Frame", frame)
+            resized_frame = cv2.resize(frame, RESIZED_DIMENSION)
+            cv2.imshow("Frame", resized_frame)
             
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
