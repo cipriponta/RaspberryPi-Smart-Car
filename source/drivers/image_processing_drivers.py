@@ -2,6 +2,7 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 import time
 import cv2
+import numpy
 from drivers.video_drivers import VideoStreamer
 from constants import *
 
@@ -33,6 +34,28 @@ class ImageProcessor:
         self.raw_capture.truncate(0)
 
         # Frame Processing TBD
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        frame_edges = cv2.Canny(image = frame_gray, 
+                                threshold1 = IMAGE_EDGES_LOW_THRESHOLD, 
+                                threshold2 = IMAGE_EDGES_HIGH_THRESHOLD, 
+                                apertureSize = IMAGE_EDGES_APERTURE_SIZE)
+        frame_road_lines = cv2.HoughLinesP(image = frame_edges, 
+                                           rho = IMAGE_HOUGHLINES_RHO, 
+                                           theta = IMAGE_HOUGHLINES_THETA, 
+                                           threshold = IMAGE_HOUGHLINES_THRESHOLD, 
+                                           minLineLength = IMAGE_HOUGHLINES_MIN_LINE_LENGTH, 
+                                           maxLineGap = IMAGE_HOUGHLINES_MAX_LINE_GAP)
+
+        if type(frame_road_lines) == numpy.ndarray:
+            if frame_road_lines.size > 0:
+                for road_line in frame_road_lines:
+                    x1, y1, x2, y2 = road_line[0]
+                    cv2.line(img = frame, 
+                             pt1 = (x1, y1), 
+                             pt2 = (x2, y2), 
+                             color = IMAGE_HOUGHLINES_COLOR, 
+                             thickness = IMAGE_HOUGHLINES_THICKNESS)
+
         processed_frame = frame
 
         if self.is_debug:

@@ -16,3 +16,6 @@
 12. [X] Create a config class for storing constant variables
 13. [X] Try to reduce motion blur by increasing the frame rate
 14. [X] Resize output image 
+15. [X] Detect lines using OpenCV
+16. [ ] Speed up image processing and image transmission by using threads
+17. [ ] Tune image parameters
