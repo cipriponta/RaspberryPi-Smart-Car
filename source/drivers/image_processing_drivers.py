@@ -14,6 +14,7 @@ class ImageProcessor:
         self.camera.iso = CAMERA_ISO
         self.camera.resolution = CAMERA_RESOLUTION
         self.camera.framerate = CAMERA_FRAMERATE
+        self.camera.rotation = CAMERA_ROTATION
 
         self.raw_capture = PiRGBArray(self.camera, size = CAMERA_RESOLUTION)
         time.sleep(CAMERA_INIT_TIME)
@@ -40,16 +41,20 @@ class ImageProcessor:
         return processed_frame
 
     def get_lines(self, frame):
-        frame_grayscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        threshold_ret_value, thresholded_frame = cv2.threshold(src = frame_grayscale,
-                                                               thresh = IMAGE_GREYSCALE_THRESHOLD_VALUE,
-                                                               maxval = IMAGE_GREYSCALE_MAX_VALUE,
-                                                               type = cv2.THRESH_BINARY_INV)
+        # Continue with tuning
+        greyscale_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        blurred_frame = IMAGE_THRESHOLD_BLUR_METHOD(src =  greyscale_frame,
+                                                    ksize = (IMAGE_THRESHOLD_BLOCK_SIZE, IMAGE_THRESHOLD_BLOCK_SIZE),
+                                                    sigmaX = 0)
+        thresholded_frame = cv2.adaptiveThreshold(src = blurred_frame,
+                                                  maxValue = IMAGE_GREYSCALE_MAX_VALUE,
+                                                  adaptiveMethod = IMAGE_THRESHOLD_ADAPTIVE_METHOD,
+                                                  thresholdType = IMAGE_THRESHOLD_TYPE,
+                                                  blockSize = IMAGE_THRESHOLD_BLOCK_SIZE,
+                                                  C = IMAGE_THRESHOLD_SUBTRACTED_CONSTANT)
         contours, hierarchy = cv2.findContours(image = thresholded_frame,
                                                mode = cv2.RETR_LIST,
                                                method = cv2.CHAIN_APPROX_SIMPLE) 
-        print(contours)
         output_frame = cv2.cvtColor(thresholded_frame, cv2.COLOR_GRAY2BGR)
         cv2.drawContours(image = output_frame,
                          contours = contours,
