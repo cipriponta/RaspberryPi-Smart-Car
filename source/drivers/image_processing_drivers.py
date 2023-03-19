@@ -2,7 +2,6 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 import time
 import cv2
-import numpy
 from drivers.video_drivers import VideoStreamer
 from constants import *
 
@@ -33,35 +32,32 @@ class ImageProcessor:
         # Clear the stream
         self.raw_capture.truncate(0)
 
-        # Frame Processing TBD
-        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        frame_edges = cv2.Canny(image = frame_gray, 
-                                threshold1 = IMAGE_EDGES_LOW_THRESHOLD, 
-                                threshold2 = IMAGE_EDGES_HIGH_THRESHOLD, 
-                                apertureSize = IMAGE_EDGES_APERTURE_SIZE)
-        frame_road_lines = cv2.HoughLinesP(image = frame_edges, 
-                                           rho = IMAGE_HOUGHLINES_RHO, 
-                                           theta = IMAGE_HOUGHLINES_THETA, 
-                                           threshold = IMAGE_HOUGHLINES_THRESHOLD, 
-                                           minLineLength = IMAGE_HOUGHLINES_MIN_LINE_LENGTH, 
-                                           maxLineGap = IMAGE_HOUGHLINES_MAX_LINE_GAP)
-
-        if type(frame_road_lines) == numpy.ndarray:
-            if frame_road_lines.size > 0:
-                for road_line in frame_road_lines:
-                    x1, y1, x2, y2 = road_line[0]
-                    cv2.line(img = frame, 
-                             pt1 = (x1, y1), 
-                             pt2 = (x2, y2), 
-                             color = IMAGE_HOUGHLINES_COLOR, 
-                             thickness = IMAGE_HOUGHLINES_THICKNESS)
-
-        processed_frame = frame
+        processed_frame = self.get_lines(frame)
 
         if self.is_debug:
             self.video_streamer.send_frame(processed_frame)
 
         return processed_frame
+
+    def get_lines(self, frame):
+        frame_grayscale = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        threshold_ret_value, thresholded_frame = cv2.threshold(src = frame_grayscale,
+                                                               thresh = IMAGE_GREYSCALE_THRESHOLD_VALUE,
+                                                               maxval = IMAGE_GREYSCALE_MAX_VALUE,
+                                                               type = cv2.THRESH_BINARY_INV)
+        contours, hierarchy = cv2.findContours(image = thresholded_frame,
+                                               mode = cv2.RETR_LIST,
+                                               method = cv2.CHAIN_APPROX_SIMPLE) 
+        print(contours)
+        output_frame = cv2.cvtColor(thresholded_frame, cv2.COLOR_GRAY2BGR)
+        cv2.drawContours(image = output_frame,
+                         contours = contours,
+                         contourIdx = -1, 
+                         color = IMAGE_LINES_COLOR,
+                         thickness = IMAGE_LINES_THICKNESS)
+        
+        return output_frame
 
     def close(self):
         if self.is_debug:

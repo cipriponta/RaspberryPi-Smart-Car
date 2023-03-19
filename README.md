@@ -18,4 +18,4 @@
 14. [X] Resize output image 
 15. [X] Detect lines using OpenCV
 16. [ ] Speed up image processing and image transmission by using threads
-17. [ ] Tune image parameters
+17. [ ] Change the line detection algorithm to contour finding 
