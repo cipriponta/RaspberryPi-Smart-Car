@@ -41,11 +41,10 @@ class ImageProcessor:
         return processed_frame
 
     def get_lines(self, frame):
-        # Continue with tuning
         greyscale_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         blurred_frame = IMAGE_THRESHOLD_BLUR_METHOD(src =  greyscale_frame,
                                                     ksize = (IMAGE_THRESHOLD_BLOCK_SIZE, IMAGE_THRESHOLD_BLOCK_SIZE),
-                                                    sigmaX = 0)
+                                                    sigmaX = IMAGE_THRESHOLD_SIGMA_X)
         thresholded_frame = cv2.adaptiveThreshold(src = blurred_frame,
                                                   maxValue = IMAGE_GREYSCALE_MAX_VALUE,
                                                   adaptiveMethod = IMAGE_THRESHOLD_ADAPTIVE_METHOD,
@@ -53,14 +52,25 @@ class ImageProcessor:
                                                   blockSize = IMAGE_THRESHOLD_BLOCK_SIZE,
                                                   C = IMAGE_THRESHOLD_SUBTRACTED_CONSTANT)
         contours, hierarchy = cv2.findContours(image = thresholded_frame,
-                                               mode = cv2.RETR_LIST,
-                                               method = cv2.CHAIN_APPROX_SIMPLE) 
+                                               mode = IMAGE_CONTOUR_RETRIEVAL_MODE,
+                                               method = IMAGE_CONTOUR_APPROX_METHOD)             
+
         output_frame = cv2.cvtColor(thresholded_frame, cv2.COLOR_GRAY2BGR)
         cv2.drawContours(image = output_frame,
                          contours = contours,
                          contourIdx = -1, 
                          color = IMAGE_LINES_COLOR,
                          thickness = IMAGE_LINES_THICKNESS)
+        
+        rectangle_list = []
+        for contour in contours:
+            rectangle = cv2.minAreaRect(contour)
+            rectangle_outline = numpy.int0(cv2.boxPoints(rectangle))
+            print(rectangle_outline)
+            try:
+                cv2.drawContours(output_frame, [rectangle_outline], 0, (0, 0, 255), 1)
+            except Exception as e:
+                print(e)
         
         return output_frame
 

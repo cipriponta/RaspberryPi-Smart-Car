@@ -3,6 +3,7 @@ import time
 from picamera import exc as PiCameraException
 from drivers.image_processing_drivers import ImageProcessor
 from constants import *
+import os
 
 def main():
     parser = argparse.ArgumentParser()

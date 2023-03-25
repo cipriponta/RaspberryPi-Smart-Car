@@ -19,3 +19,4 @@
 15. [X] Detect lines using OpenCV
 16. [ ] Speed up image processing and image transmission by using threads
 17. [ ] Change the line detection algorithm to contour finding 
+18. [ ] Create a logging system that behaves like a dashboard
