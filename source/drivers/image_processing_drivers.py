@@ -101,25 +101,25 @@ class ImageProcessor:
     def draw_output(self, output_frame, contours, rectangle_outlines, lines):
         if IMAGE_DISPLAY_CONTOURS:
             cv2.drawContours(image = output_frame, 
-                            contours = contours, 
-                            contourIdx = -1, 
-                            color = IMAGE_CONTOUR_COLOR, 
-                            thickness = IMAGE_LINES_THICKNESS)
+                             contours = contours, 
+                             contourIdx = -1, 
+                             color = IMAGE_CONTOUR_COLOR, 
+                             thickness = IMAGE_LINES_THICKNESS)
             
         if IMAGE_DISPLAY_BOUNDED_LINES:
             cv2.drawContours(image = output_frame, 
-                            contours = rectangle_outlines, 
-                            contourIdx = -1, 
-                            color = IMAGE_RECTANGLE_COLOR, 
-                            thickness = IMAGE_LINES_THICKNESS)
+                             contours = rectangle_outlines, 
+                             contourIdx = -1, 
+                             color = IMAGE_RECTANGLE_COLOR, 
+                             thickness = IMAGE_LINES_THICKNESS)
 
         if IMAGE_DISPLAY_LINES:
             for line in lines:
                 cv2.line(img = output_frame,
-                        pt1 = line[0],
-                        pt2 = line[1],
-                        color = IMAGE_LINES_COLOR,
-                        thickness = IMAGE_LINES_THICKNESS)
+                         pt1 = line[0],
+                         pt2 = line[1],
+                         color = IMAGE_LINES_COLOR,
+                         thickness = IMAGE_LINES_THICKNESS)
         return output_frame
 
     def close(self):
