@@ -18,10 +18,9 @@
 14. [X] Resize output image 
 15. [X] Detect lines using OpenCV
 16. [ ] Speed up image processing and image transmission by using threads
-17. [ ] Change the line detection algorithm to contour finding 
+17. [X] Change the line detection algorithm to contour finding 
 18. [ ] Create a logging system that behaves like a dashboard
 19. [ ] Setup the python debugger for VSCode
 20. [ ] Investigate convex hull algorithm
 21. [ ] Investigate houghlines algorithm
-22. [ ] Add a new output frame color parameter for the CLI command
  
