@@ -8,7 +8,7 @@
 4.  [X] Make the opencv framework work on the raspberry pi
 5.  [X] Create a python class for streaming video over a socket
 6.  [X] Create a python class for image processing
-7.  [ ] Create a python class for the motors controller 
+7.  [X] Create a python class for the motors controller 
 8.  [X] Access the rpi physically and test if the camera can display video in real time
 9.  [X] Establish a client server connection between rpi and pc
 10. [X] Stream video to pc 
@@ -23,4 +23,5 @@
 19. [ ] Setup the python debugger for VSCode
 20. [ ] Investigate convex hull algorithm
 21. [ ] Investigate houghlines algorithm
+22. [ ] Create a simple PID Controller that changes the direction of the robot from the camera input
  

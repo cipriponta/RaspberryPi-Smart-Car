@@ -2,6 +2,7 @@ import argparse
 import time
 from picamera import exc as PiCameraException
 from drivers.image_processing_drivers import ImageProcessor
+from drivers.chassis_driver import ChassisDriver
 from constants import *
 
 def main():
@@ -16,12 +17,16 @@ def main():
     else:
         is_debug = False
 
-    image_processor = ImageProcessor(is_debug)   
+    image_processor = ImageProcessor(is_debug)  
+    chassis_controller = ChassisDriver() 
 
     try:
         while True:
             start_time = time.time()
+
             processed_frame = image_processor.get_processed_frame()
+            chassis_controller.change_direction()
+
             end_time = time.time()
             print("Process duration: ", end_time - start_time)
             time.sleep(LOOP_DELAY)  
@@ -32,6 +37,7 @@ def main():
         print("The connection has been closed by the server")
     finally:
         image_processor.close()   
+        chassis_controller.close()
 
 if __name__ == "__main__":
     main()

@@ -45,6 +45,14 @@ IMAGE_DISPLAY_CONTOURS = True
 IMAGE_DISPLAY_BOUNDED_LINES = True
 IMAGE_DISPLAY_LINES = True
 
+# Motor Pins
+PIN_MOTOR_A_EN = 33             # Yellow Cable
+PIN_MOTOR_A_IN1 = 31            # Brown Cable
+PIN_MOTOR_A_IN2 = 29            # Orange Cable
+PIN_MOTOR_B_EN = 32             # White Cable
+PIN_MOTOR_B_IN1 = 40            # Purple Cable
+PIN_MOTOR_B_IN2 = 38            # Green Cable
+
 # Debug Server Constants
 RPI_IP_ADDRESS = "192.168.0.194"
 RPI_PORT = 9999
