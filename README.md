@@ -25,4 +25,5 @@
 21. [ ] Investigate houghlines algorithm
 22. [ ] Create a simple PID Controller that changes the direction of the robot from the camera input
 23. [ ] Optimize the Line class by adding the length attribute
+24. [ ] Create the Point class to optimize code
  
