@@ -10,6 +10,9 @@ def main():
     parser.add_argument("--debug", 
                         help = "Allows real time debugging of the camera input on another machine", 
                         action="store_true")
+    parser.add_argument("--stand", 
+                        help = "Used for debugging, the input from the chassis driver is not sent to the wheels", 
+                        action="store_true")
     args = parser.parse_args()
 
     if args.debug:
@@ -17,8 +20,13 @@ def main():
     else:
         is_debug = False
 
+    if args.stand:
+        standing_mode = True
+    else:
+        standing_mode = False
+
     image_processor = ImageProcessor(is_debug)  
-    chassis_controller = ChassisDriver() 
+    chassis_controller = ChassisDriver(standing_mode) 
 
     try:
         while True:
