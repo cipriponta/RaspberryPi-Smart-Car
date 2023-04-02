@@ -44,9 +44,8 @@ class ChassisDriver():
         self.calculate_duty_cycles()
 
         if not self.standing_mode:
-            self.left_motor_pwm.start(100)
-            self.right_motor_pwm.start(100)
-            pass
+            self.left_motor_pwm.start(self.left_motor_duty_cycle)
+            self.right_motor_pwm.start(self.right_motor_duty_cycle)
 
     def pid_control(self, line_shift):
         self.input = line_shift
