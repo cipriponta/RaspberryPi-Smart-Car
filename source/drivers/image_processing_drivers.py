@@ -81,7 +81,7 @@ class ImageProcessor:
             self.video_streamer.connect()
             self.video_streamer.search_for_clients()
 
-    def get_processed_frame(self):
+    def get_line_shift(self):
         self.camera.capture(self.raw_capture, format = IMAGE_FORMAT_BGR)
         frame = self.raw_capture.array
         
@@ -91,29 +91,31 @@ class ImageProcessor:
         greyscale_frame, blurred_frame, thresholded_frame, contours = self.get_contours(frame)
         rectangle_outlines, lines = self.get_lines(contours)
         left_line, middle_line, right_line = self.get_guiding_lines(lines)
-
-        output_frame = None
-        if IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.COLOR:
-            output_frame = frame
-        elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.GREYSCALE:
-            output_frame = cv2.cvtColor(greyscale_frame, cv2.COLOR_GRAY2BGR)
-        elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.BLURRED:
-            output_frame = cv2.cvtColor(blurred_frame, cv2.COLOR_GRAY2BGR)
-        elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.THRESHOLDED:
-            output_frame = cv2.cvtColor(thresholded_frame, cv2.COLOR_GRAY2BGR)
-
-        processed_frame = self.draw_output(output_frame = output_frame,
-                                            contours = contours,
-                                            rectangle_outlines = rectangle_outlines,
-                                            lines = lines,
-                                            left_line = left_line,
-                                            middle_line = middle_line,
-                                            right_line = right_line)
+        line_shift = self.calculate_line_shift(middle_line)
 
         if self.is_debug:
+            output_frame = None
+
+            if IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.COLOR:
+                output_frame = frame
+            elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.GREYSCALE:
+                output_frame = cv2.cvtColor(greyscale_frame, cv2.COLOR_GRAY2BGR)
+            elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.BLURRED:
+                output_frame = cv2.cvtColor(blurred_frame, cv2.COLOR_GRAY2BGR)
+            elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.THRESHOLDED:
+                output_frame = cv2.cvtColor(thresholded_frame, cv2.COLOR_GRAY2BGR)
+
+            processed_frame = self.draw_output(output_frame = output_frame,
+                                                contours = contours,
+                                                rectangle_outlines = rectangle_outlines,
+                                                lines = lines,
+                                                left_line = left_line,
+                                                middle_line = middle_line,
+                                                right_line = right_line)
+            
             self.video_streamer.send_frame(processed_frame)
 
-        return processed_frame
+        return line_shift
 
     def get_contours(self, frame):
         greyscale_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -177,11 +179,6 @@ class ImageProcessor:
         left_lines.sort(key = lambda line : line.get_euclidian_distance(), reverse = True)
         right_lines.sort(key = lambda line : line.get_euclidian_distance(), reverse = True)
 
-        print("Left Lines: ")
-        print(left_lines)
-        print("Right Lines: ")
-        print(right_lines)
-
         left_line = None
         middle_line = None
         right_line = None
@@ -200,7 +197,9 @@ class ImageProcessor:
                             ((left_line.line_tip + right_line.line_tip) / 2).astype(int)])
 
         return left_line, middle_line, right_line
-
+    
+    def calculate_line_shift(self, middle_line):
+        return int(CAMERA_IMAGE_WIDTH / 2) - int((middle_line.line_tip[0] + middle_line.line_origin[0]) / 2)
 
     def draw_output(self, output_frame, contours, rectangle_outlines, lines, left_line, middle_line, right_line):
         if IMAGE_DISPLAY_CONTOURS:

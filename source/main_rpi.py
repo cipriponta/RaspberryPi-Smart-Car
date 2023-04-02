@@ -32,11 +32,12 @@ def main():
         while True:
             start_time = time.time()
 
-            processed_frame = image_processor.get_processed_frame()
-            chassis_controller.change_direction()
+            line_shift = image_processor.get_line_shift()
+            chassis_controller.change_direction(line_shift)
 
             end_time = time.time()
             print("Process duration: ", end_time - start_time)
+            print("Pid stats: ", chassis_controller.get_stats())
             time.sleep(LOOP_DELAY)  
 
     except (BrokenPipeError, ConnectionResetError):
