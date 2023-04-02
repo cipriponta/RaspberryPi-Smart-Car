@@ -60,7 +60,7 @@ PIN_MOTOR_B_EN = 32             # White Cable
 PIN_MOTOR_B_IN1 = 40            # Purple Cable
 PIN_MOTOR_B_IN2 = 38            # Green Cable
 
-MOTOR_PWM_FREQ = 8000
+MOTOR_PWM_FREQ = 500
 MOTOR_PWM_NORMAL_DUTY_CYCLE = 100
 
 MOTOR_PID_LINE_SETPOINT = 0
