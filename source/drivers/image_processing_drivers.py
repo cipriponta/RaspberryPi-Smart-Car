@@ -5,6 +5,61 @@ import cv2
 from drivers.video_drivers import VideoStreamer
 from constants import *
 
+class Line:
+    def __init__(self, line):
+        self.line_origin = None
+        self.line_tip = None
+
+        # Comparing line heights to find out which point is the tip 
+        # and which point is the origin
+        if line[0][1] > line[1][1]:
+            self.line_origin = numpy.array([line[0][0], line[0][1]])
+            self.line_tip = numpy.array([line[1][0], line[1][1]])
+        else:
+            self.line_origin = numpy.array([line[1][0], line[1][1]])
+            self.line_tip = numpy.array([line[0][0], line[0][1]])
+
+        if self.line_origin[0] > CAMERA_IMAGE_WIDTH:
+            self.line_origin[0] =  CAMERA_IMAGE_WIDTH
+        elif self.line_origin[0] < 0:
+            self.line_origin[0] = 0
+
+        if self.line_origin[1] > CAMERA_IMAGE_HEIGHT:
+            self.line_origin[1] = CAMERA_IMAGE_HEIGHT
+        elif self.line_origin[1] < 0:
+            self.line_origin[1] = 0
+
+        if self.line_tip[0] > CAMERA_IMAGE_WIDTH:
+            self.line_tip[0] =  CAMERA_IMAGE_WIDTH
+        elif self.line_tip[0] < 0:
+            self.line_tip[0] = 0
+
+        if self.line_tip[1] > CAMERA_IMAGE_HEIGHT:
+            self.line_tip[1] = CAMERA_IMAGE_HEIGHT
+        elif self.line_tip[1] < 0:
+            self.line_tip[1] = 0
+    
+    def __repr__(self):
+        return f"[O: ({self.line_origin[0]}, {self.line_origin[1]})," \
+               f" T: ({self.line_tip[0]}, {self.line_tip[1]})," \
+               f" L: {int(self.get_euclidian_distance())}]"
+
+    def get_euclidian_distance(self):
+        return numpy.linalg.norm(self.line_origin - self.line_tip)
+    
+    def check_min_line_length(self):
+        if self.get_euclidian_distance() > IMAGE_LINES_MIN_LENGTH:
+            return True
+        else:
+            return False
+
+    def draw(self, output_image, color):
+        cv2.arrowedLine(img = output_image,
+                        pt1 = self.line_origin,
+                        pt2 = self.line_tip,
+                        color = color,
+                        thickness =  IMAGE_LINES_THICKNESS)
+
 class ImageProcessor:
     def __init__(self, is_debug):
         self.is_debug = is_debug
@@ -26,7 +81,7 @@ class ImageProcessor:
             self.video_streamer.connect()
             self.video_streamer.search_for_clients()
 
-    def get_processed_frame(self):
+    def get_line_shift(self):
         self.camera.capture(self.raw_capture, format = IMAGE_FORMAT_BGR)
         frame = self.raw_capture.array
         
@@ -35,26 +90,32 @@ class ImageProcessor:
 
         greyscale_frame, blurred_frame, thresholded_frame, contours = self.get_contours(frame)
         rectangle_outlines, lines = self.get_lines(contours)
-
-        output_frame = None
-        if IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.COLOR:
-            output_frame = frame
-        elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.GREYSCALE:
-            output_frame = cv2.cvtColor(greyscale_frame, cv2.COLOR_GRAY2BGR)
-        elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.BLURRED:
-            output_frame = cv2.cvtColor(blurred_frame, cv2.COLOR_GRAY2BGR)
-        elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.THRESHOLDED:
-            output_frame = cv2.cvtColor(thresholded_frame, cv2.COLOR_GRAY2BGR)
-        
-        processed_frame = self.draw_output(output_frame = output_frame,
-                                            contours = contours,
-                                            rectangle_outlines = rectangle_outlines,
-                                            lines = lines)
+        left_line, middle_line, right_line = self.get_guiding_lines(lines)
+        line_shift = self.calculate_line_shift(middle_line)
 
         if self.is_debug:
+            output_frame = None
+
+            if IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.COLOR:
+                output_frame = frame
+            elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.GREYSCALE:
+                output_frame = cv2.cvtColor(greyscale_frame, cv2.COLOR_GRAY2BGR)
+            elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.BLURRED:
+                output_frame = cv2.cvtColor(blurred_frame, cv2.COLOR_GRAY2BGR)
+            elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.THRESHOLDED:
+                output_frame = cv2.cvtColor(thresholded_frame, cv2.COLOR_GRAY2BGR)
+
+            processed_frame = self.draw_output(output_frame = output_frame,
+                                                contours = contours,
+                                                rectangle_outlines = rectangle_outlines,
+                                                lines = lines,
+                                                left_line = left_line,
+                                                middle_line = middle_line,
+                                                right_line = right_line)
+            
             self.video_streamer.send_frame(processed_frame)
 
-        return processed_frame
+        return line_shift
 
     def get_contours(self, frame):
         greyscale_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -74,7 +135,7 @@ class ImageProcessor:
         return greyscale_frame, blurred_frame, thresholded_frame, contours
 
     def get_lines(self, contours):
-        lines_list = []
+        line_list = []
         rectangle_outlines = []
 
         for contour in contours:
@@ -91,14 +152,56 @@ class ImageProcessor:
             middle4 = numpy.array([int((rectangle_outline[3][0] + rectangle_outline[0][0]) / 2), 
                                    int((rectangle_outline[3][1] + rectangle_outline[0][1]) / 2)])
             
-            if numpy.linalg.norm(middle1 - middle3) > numpy.linalg.norm(middle2 - middle4):
-                lines_list.append([middle1, middle3])
+            rect_middle_line = None
+            rect_middle_line1 = Line([middle1, middle3])
+            rect_middle_line2 = Line([middle2, middle4])
+
+            if rect_middle_line1.get_euclidian_distance() > rect_middle_line2.get_euclidian_distance():
+                rect_middle_line = rect_middle_line1
             else:
-                lines_list.append([middle2, middle4])
+                rect_middle_line = rect_middle_line2
+
+            if rect_middle_line.check_min_line_length():
+                line_list.append(rect_middle_line)
            
-        return rectangle_outlines, lines_list
+        return rectangle_outlines, line_list
     
-    def draw_output(self, output_frame, contours, rectangle_outlines, lines):
+    def get_guiding_lines(self, lines):
+        left_lines = []
+        right_lines = []
+
+        for line in lines:
+            if line.line_origin[0] < CAMERA_IMAGE_WIDTH / 2:
+                left_lines.append(line)
+            else:
+                right_lines.append(line)
+
+        left_lines.sort(key = lambda line : line.get_euclidian_distance(), reverse = True)
+        right_lines.sort(key = lambda line : line.get_euclidian_distance(), reverse = True)
+
+        left_line = None
+        middle_line = None
+        right_line = None
+
+        if len(left_lines) > 0:
+            left_line = left_lines[0]
+        else:
+            left_line = Line([[0, CAMERA_IMAGE_HEIGHT], [0, 0]])
+
+        if len(right_lines) > 0:
+            right_line = right_lines[0]
+        else:
+            right_line = Line([[CAMERA_IMAGE_WIDTH, CAMERA_IMAGE_HEIGHT], [CAMERA_IMAGE_WIDTH, 0]])
+
+        middle_line = Line([((left_line.line_origin + right_line.line_origin) / 2).astype(int), 
+                            ((left_line.line_tip + right_line.line_tip) / 2).astype(int)])
+
+        return left_line, middle_line, right_line
+    
+    def calculate_line_shift(self, middle_line):
+        return int(CAMERA_IMAGE_WIDTH / 2) - int((middle_line.line_tip[0] + middle_line.line_origin[0]) / 2)
+
+    def draw_output(self, output_frame, contours, rectangle_outlines, lines, left_line, middle_line, right_line):
         if IMAGE_DISPLAY_CONTOURS:
             cv2.drawContours(image = output_frame, 
                              contours = contours, 
@@ -113,13 +216,15 @@ class ImageProcessor:
                              color = IMAGE_RECTANGLE_COLOR, 
                              thickness = IMAGE_LINES_THICKNESS)
 
-        if IMAGE_DISPLAY_LINES:
+        if IMAGE_DISPLAY_ALL_LINES:
             for line in lines:
-                cv2.line(img = output_frame,
-                         pt1 = line[0],
-                         pt2 = line[1],
-                         color = IMAGE_LINES_COLOR,
-                         thickness = IMAGE_LINES_THICKNESS)
+                line.draw(output_frame, IMAGE_LINES_COLOR)
+
+        if IMAGE_DISPLAY_GUIDING_LINES:
+            left_line.draw(output_frame, IMAGE_LINES_LEFT_LINE_COLOR)
+            middle_line.draw(output_frame, IMAGE_LINES_MIDDLE_LINE_COLOR)
+            right_line.draw(output_frame, IMAGE_LINES_RIGHT_LINE_COLOR)
+
         return output_frame
 
     def close(self):

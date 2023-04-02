@@ -10,6 +10,9 @@ def main():
     parser.add_argument("--debug", 
                         help = "Allows real time debugging of the camera input on another machine", 
                         action="store_true")
+    parser.add_argument("--stand", 
+                        help = "Used for debugging, the input from the chassis driver is not sent to the wheels", 
+                        action="store_true")
     args = parser.parse_args()
 
     if args.debug:
@@ -17,18 +20,24 @@ def main():
     else:
         is_debug = False
 
+    if args.stand:
+        standing_mode = True
+    else:
+        standing_mode = False
+
     image_processor = ImageProcessor(is_debug)  
-    chassis_controller = ChassisDriver() 
+    chassis_controller = ChassisDriver(standing_mode) 
 
     try:
         while True:
             start_time = time.time()
 
-            processed_frame = image_processor.get_processed_frame()
-            chassis_controller.change_direction()
+            line_shift = image_processor.get_line_shift()
+            chassis_controller.change_direction(line_shift)
 
             end_time = time.time()
             print("Process duration: ", end_time - start_time)
+            print("Pid stats: ", chassis_controller.get_stats())
             time.sleep(LOOP_DELAY)  
 
     except (BrokenPipeError, ConnectionResetError):
