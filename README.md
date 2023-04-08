@@ -23,7 +23,12 @@
 19. [ ] Setup the python debugger for VSCode
 20. [ ] Investigate convex hull algorithm
 21. [ ] Investigate houghlines algorithm
-22. [ ] Create a simple PID Controller that changes the direction of the robot from the camera input
+22. [X] Create a simple PID Controller that changes the direction of the robot from the camera input
 23. [ ] Optimize the Line class by adding the length attribute
 24. [ ] Create the Point class to optimize code
- 
+25. [ ] Implement the sliding window approach for the Lane Detection 
+    - Add region of interest
+    - Choose the correct camera position
+    - Add perspective warp
+    - Split the line contours into multiple points
+26. [ ] Tune the PID Controller
