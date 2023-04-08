@@ -32,3 +32,4 @@
     - Add perspective warp
     - Split the line contours into multiple points
 26. [ ] Tune the PID Controller
+27. [ ] Create a new track layout that is the size of 2 A0 sheets
