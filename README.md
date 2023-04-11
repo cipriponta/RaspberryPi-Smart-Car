@@ -19,9 +19,8 @@
 - [X] Detect lines using OpenCV
 - [X] Change the line detection algorithm to contour finding 
 - [X] Create a simple PID Controller that changes the direction of the robot from the camera input
-- [ ] Create a logging system 
-- [ ] Setup the python debugger for VSCode
-- [ ] Create a new track layout that is the size of 2 A0 sheets
+- [X] Setup the python debugger for VSCode
+- [X] Create a new track layout that is the size of 2 A0 sheets
 - [ ] Implement the sliding window approach for the Lane Detection 
     - Optimize the Line class by adding the length attribute
     - Create the Point class to optimize code
@@ -36,3 +35,4 @@
 - [ ] Speed up image processing and image transmission by using threads
 - [ ] Investigate convex hull algorithm
 - [ ] Investigate houghlines algorithm
+- [ ] Create a logging system 
