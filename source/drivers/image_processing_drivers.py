@@ -158,7 +158,7 @@ class ProcessedContour:
             self.rect_dir_line = rect_middle_line2
             self.rect_per_line = rect_middle_line1
 
-    def get_sliding_window_points(self, thresholded_frame):
+    def get_sliding_windows_points(self, thresholded_frame):
         rect_dir_width_seg = int(math.ceil((self.rect_dir_line.tip.width - self.rect_dir_line.origin.width) 
                                            / IMAGE_SLIDING_WINDOW_SECTIONS))
         rect_dir_height_seg = int(math.ceil((self.rect_dir_line.tip.height - self.rect_dir_line.origin.height) 
@@ -190,8 +190,20 @@ class ProcessedContour:
             sliding_window.get_sliding_window_centre(thresholded_frame)       
             self.sliding_windows.append(sliding_window)
 
+    def get_sliding_windows_points_value(self):
+        sliding_windows_points = []
+        for sliding_window in self.sliding_windows:
+            sliding_windows_points.append(sliding_window.centre)
+        return sliding_windows_points
+
     def check_valid(self):
         return self.rect_dir_line.check_min_line_length() and self.rect_dir_line.check_angle()
+
+    def check_if_contour_belongs_to_left_side(self):
+        if self.rect_dir_line.origin.width < int(CAMERA_IMAGE_WIDTH / 2):
+            return True
+        else:
+            return False
     
     def draw(self, output_frame):
         if IMAGE_DISPLAY_CONTOURS:
@@ -208,8 +220,10 @@ class ProcessedContour:
                              color = IMAGE_RECTANGLE_COLOR, 
                              thickness = IMAGE_LINES_THICKNESS)
             
-        if IMAGE_DISPLAY_ALL_LINES:
+        if IMAGE_DISPLAY_DIR_LINES:
             self.rect_dir_line.draw(output_frame)
+        
+        if IMAGE_DISPLAY_PER_LINES:
             self.rect_per_line.draw(output_frame)
         
         if IMAGE_DISPLAY_SLIDING_WINDOW or IMAGE_DISPLAY_SLIDING_WINDOW_CENTRE:
@@ -245,6 +259,26 @@ class ImageProcessor:
 
         self.contours = None
         self.processed_contours = []
+        self.left_side_contours = []
+        self.right_side_contours = []
+
+        self.default_left_line_points = []
+        self.default_right_line_points = []
+
+        self.left_line_points = []
+        self.right_line_points = []
+        self.middle_line_points = []
+
+        self.init_sliding_windows_points_for_default_lines()
+
+    def init_sliding_windows_points_for_default_lines(self):
+        seg_height = int(math.ceil(CAMERA_IMAGE_HEIGHT / IMAGE_SLIDING_WINDOW_SECTIONS))
+
+        for seg_count in range(0, IMAGE_SLIDING_WINDOW_SECTIONS, 1):
+            self.default_left_line_points.append(Point(0, CAMERA_IMAGE_HEIGHT - seg_count * seg_height))
+            self.default_right_line_points.append(Point(CAMERA_IMAGE_WIDTH, CAMERA_IMAGE_HEIGHT - seg_count * seg_height))
+
+        pass
 
     def get_line_shift(self):
         self.camera.capture(self.raw_capture, format = IMAGE_FORMAT_BGR)
@@ -254,6 +288,7 @@ class ImageProcessor:
         self.raw_capture.truncate(0)
 
         self.get_contours()
+        self.get_middle_line()
 
         if self.is_debug:
             if IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.COLOR:
@@ -287,15 +322,57 @@ class ImageProcessor:
                                             method = IMAGE_CONTOUR_APPROX_METHOD)
         
         self.processed_contours.clear()
+        self.left_side_contours.clear()
+        self.right_side_contours.clear()
+
         for contour in self.contours:
             processed_contour = ProcessedContour(contour)
             if processed_contour.check_valid():
-                processed_contour.get_sliding_window_points(self.thresholded_frame)
+                processed_contour.get_sliding_windows_points(self.thresholded_frame)
                 self.processed_contours.append(processed_contour)  
+
+                if processed_contour.check_if_contour_belongs_to_left_side():
+                    self.left_side_contours.append(processed_contour)
+                else:
+                    self.right_side_contours.append(processed_contour)
+
+    def get_middle_line(self):
+        self.left_side_contours.sort(key = lambda contour: contour.rect_dir_line.length, reverse=True)
+        self.right_side_contours.sort(key = lambda contour: contour.rect_dir_line.length, reverse=True)
+        
+        self.left_line_points.clear()
+        self.right_line_points.clear()
+        self.middle_line_points.clear()
+
+        if len(self.left_side_contours) == 0:
+            self.left_line_points = self.default_left_line_points.copy()
+        else:
+            self.left_line_points = self.left_side_contours[0].get_sliding_windows_points_value()
+
+        if len(self.right_side_contours) == 0:
+            self.right_line_points = self.default_right_line_points.copy()
+        else:
+            self.right_line_points = self.right_side_contours[0].get_sliding_windows_points_value()
+
+        for point_count in range(0, IMAGE_SLIDING_WINDOW_SECTIONS, 1):
+            self.middle_line_points.append(Point(
+                int((self.left_line_points[point_count].width + self.right_line_points[point_count].width) / 2),
+                int((self.left_line_points[point_count].height + self.right_line_points[point_count].height) / 2),
+            ))
 
     def draw(self, output_frame):
         for contour in self.processed_contours:
             contour.draw(output_frame)
+
+        if IMAGE_DISPLAY_SLIDING_WINDOW_GUIDING_LINES:
+            for point in self.left_line_points:
+                point.draw(output_frame, IMAGE_SLIDING_WINDOW_LEFT_LINE_COLOR)
+
+            for point in self.right_line_points:
+                point.draw(output_frame, IMAGE_SLIDING_WINDOW_RIGHT_LINE_COLOR)
+
+            for point in self.middle_line_points:
+                point.draw(output_frame, IMAGE_SLIDING_WINDOW_MIDDLE_LINE_COLOR)
 
     def close(self):
         if self.is_debug:
