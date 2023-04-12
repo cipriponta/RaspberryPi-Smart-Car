@@ -38,7 +38,6 @@ def main():
             end_time = time.time()
             print("Process duration: ", end_time - start_time)
             print("Pid stats: ", chassis_controller.get_stats())
-            time.sleep(LOOP_DELAY)  
 
     except (BrokenPipeError, ConnectionResetError):
         print("The connection has been closed by the client")
