@@ -36,8 +36,10 @@ def main():
             chassis_controller.change_direction(line_shift)
 
             end_time = time.time()
-            print("Process duration: ", end_time - start_time)
-            print("Pid stats: ", chassis_controller.get_stats())
+            duration = round(end_time - start_time, 2)
+            if is_debug:
+                print("Process duration: {:.2f}".format(duration), end='\t')
+                print("Pid stats: ", chassis_controller.get_stats())
 
     except (BrokenPipeError, ConnectionResetError):
         print("The connection has been closed by the client")

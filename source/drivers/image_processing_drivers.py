@@ -33,6 +33,28 @@ class Point:
                    color = color,
                    thickness = IMAGE_LINES_THICKNESS)
 
+    def draw_polynomial(points_list, output_frame, color):
+        x_coords_list = []
+        y_coords_list = []
+
+        for point in points_list:
+            x_coords_list.append(point.width)
+            y_coords_list.append(point.height)
+            if IMAGE_DISPLAY_SLIDING_WINDOW_GUIDING_LINES_POINTS:
+                point.draw(output_frame, color)
+        
+        if IMAGE_DISPLAY_SLIDING_WINDOW_GUIDING_LINES:
+            x_coords_array = numpy.array(x_coords_list)
+            y_coords_array = numpy.array(y_coords_list)
+            coords_array = numpy.stack((x_coords_array, y_coords_array), axis = 1)
+            coords_array = coords_array.astype(int)
+
+            cv2.polylines(img = output_frame,
+                        pts = [coords_array],
+                        isClosed = False,
+                        color = color,
+                        thickness = IMAGE_LINES_THICKNESS)
+        
 class Line:
     def __init__(self, pt1, pt2):
         self.origin = None
@@ -278,8 +300,6 @@ class ImageProcessor:
             self.default_left_line_points.append(Point(0, CAMERA_IMAGE_HEIGHT - seg_count * seg_height))
             self.default_right_line_points.append(Point(CAMERA_IMAGE_WIDTH, CAMERA_IMAGE_HEIGHT - seg_count * seg_height))
 
-        pass
-
     def get_line_shift(self):
         self.camera.capture(self.raw_capture, format = IMAGE_FORMAT_BGR)
         self.frame = self.raw_capture.array
@@ -289,6 +309,7 @@ class ImageProcessor:
 
         self.get_contours()
         self.get_middle_line()
+        error = self.calculate_error()
 
         if self.is_debug:
             if IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.COLOR:
@@ -303,7 +324,7 @@ class ImageProcessor:
             self.draw(self.output_frame)
             self.video_streamer.send_frame(self.output_frame)
 
-        return 0
+        return error
 
     def get_contours(self):
         self.greyscale_frame = cv2.cvtColor(src = self.frame, 
@@ -360,19 +381,23 @@ class ImageProcessor:
                 int((self.left_line_points[point_count].height + self.right_line_points[point_count].height) / 2),
             ))
 
+    def calculate_error(self):
+        error = 0.0
+        for point_count in range(0, IMAGE_SLIDING_WINDOW_SECTIONS, 1):
+            error = error + \
+                    (self.middle_line_points[point_count].width - (CAMERA_IMAGE_WIDTH / 2)) * \
+                    IMAGE_SLIDING_WINDOW_BIASES[point_count]
+        return error
+
     def draw(self, output_frame):
         for contour in self.processed_contours:
             contour.draw(output_frame)
 
-        if IMAGE_DISPLAY_SLIDING_WINDOW_GUIDING_LINES:
-            for point in self.left_line_points:
-                point.draw(output_frame, IMAGE_SLIDING_WINDOW_LEFT_LINE_COLOR)
-
-            for point in self.right_line_points:
-                point.draw(output_frame, IMAGE_SLIDING_WINDOW_RIGHT_LINE_COLOR)
-
-            for point in self.middle_line_points:
-                point.draw(output_frame, IMAGE_SLIDING_WINDOW_MIDDLE_LINE_COLOR)
+        if IMAGE_DISPLAY_SLIDING_WINDOW_GUIDING_LINES or \
+           IMAGE_DISPLAY_SLIDING_WINDOW_GUIDING_LINES_POINTS:
+            Point.draw_polynomial(self.left_line_points, output_frame, IMAGE_SLIDING_WINDOW_LEFT_LINE_COLOR)
+            Point.draw_polynomial(self.right_line_points, output_frame, IMAGE_SLIDING_WINDOW_RIGHT_LINE_COLOR)
+            Point.draw_polynomial(self.middle_line_points, output_frame, IMAGE_SLIDING_WINDOW_MIDDLE_LINE_COLOR)
 
     def close(self):
         if self.is_debug:
