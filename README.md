@@ -22,12 +22,6 @@
 - [X] Setup the python debugger for VSCode
 - [X] Create a new track layout that is the size of 2 A0 sheets
 - [ ] Implement the sliding window approach for the Lane Detection 
-    - Optimize the Line class by adding the length attribute
-    - Create the Point class to optimize code
-    - Add region of interest
-    - Choose the correct camera position
-    - Add perspective warp
-    - Split the line contours into multiple points
 - [ ] Tune the PID Controller
 
 #### Optional
