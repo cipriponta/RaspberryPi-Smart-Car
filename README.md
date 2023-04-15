@@ -21,7 +21,7 @@
 - [X] Create a simple PID Controller that changes the direction of the robot from the camera input
 - [X] Setup the python debugger for VSCode
 - [X] Create a new track layout that is the size of 2 A0 sheets
-- [ ] Implement the sliding window approach for the Lane Detection 
+- [X] Implement the sliding window approach for the Lane Detection 
 - [ ] Tune the PID Controller
 
 #### Optional
@@ -29,4 +29,4 @@
 - [ ] Speed up image processing and image transmission by using threads
 - [ ] Investigate convex hull algorithm
 - [ ] Investigate houghlines algorithm
-- [ ] Create a logging system 
+- [X] Create a logging system 
