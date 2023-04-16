@@ -291,7 +291,9 @@ class ImageProcessor:
         self.right_line_points = []
         self.middle_line_points = []
 
-        self.init_sliding_windows_points_for_default_lines()
+        self.init_sliding_windows_points_for_default_lines()   
+
+        self.error = 0.0
 
     def init_sliding_windows_points_for_default_lines(self):
         seg_height = int(math.ceil(CAMERA_IMAGE_HEIGHT / IMAGE_SLIDING_WINDOW_SECTIONS))
@@ -309,7 +311,7 @@ class ImageProcessor:
 
         self.get_contours()
         self.get_middle_line()
-        error = self.calculate_error()
+        self.calculate_error()
 
         if self.is_debug:
             if IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.COLOR:
@@ -324,7 +326,7 @@ class ImageProcessor:
             self.draw(self.output_frame)
             self.video_streamer.send_frame(self.output_frame)
 
-        return error
+        return self.error
 
     def get_contours(self):
         self.greyscale_frame = cv2.cvtColor(src = self.frame, 
@@ -382,12 +384,12 @@ class ImageProcessor:
             ))
 
     def calculate_error(self):
-        error = 0.0
+        self.error = 0.0
         for point_count in range(0, IMAGE_SLIDING_WINDOW_SECTIONS, 1):
-            error = error + \
-                    (self.middle_line_points[point_count].width - (CAMERA_IMAGE_WIDTH / 2)) * \
-                    IMAGE_SLIDING_WINDOW_BIASES[point_count]
-        return error
+            self.error = self.error + \
+                         (self.middle_line_points[point_count].width - (CAMERA_IMAGE_WIDTH / 2)) * \
+                         IMAGE_SLIDING_WINDOW_BIASES[point_count]
+        return self.error
 
     def draw(self, output_frame):
         for contour in self.processed_contours:
@@ -398,6 +400,22 @@ class ImageProcessor:
             Point.draw_polynomial(self.left_line_points, output_frame, IMAGE_SLIDING_WINDOW_LEFT_LINE_COLOR)
             Point.draw_polynomial(self.right_line_points, output_frame, IMAGE_SLIDING_WINDOW_RIGHT_LINE_COLOR)
             Point.draw_polynomial(self.middle_line_points, output_frame, IMAGE_SLIDING_WINDOW_MIDDLE_LINE_COLOR)
+
+        if IMAGE_DISPLAY_ERROR_VALUE:
+            cv2.rectangle(img = output_frame,
+                          pt1 = IMAGE_LINE_ERROR_RECT_COORDS_STARTING_POINT,
+                          pt2 = IMAGE_LINE_ERROR_RECT_COORDS_ENDING_POINT,
+                          color = IMAGE_LINE_ERROR_RECT_COLOR,
+                          thickness = -1)
+            cv2.putText(img = output_frame,
+                        text = f"{self.error}",
+                        org = IMAGE_LINE_ERROR_RECT_COORDS_STARTING_POINT,
+                        fontFace = cv2.FONT_HERSHEY_SIMPLEX,
+                        fontScale = IMAGE_LINE_ERROR_TEXT_FONT_SIZE,
+                        color = IMAGE_LINE_ERROR_TEXT_COLOR,
+                        thickness = IMAGE_LINE_ERROR_TEXT_THICKNESS,
+                        lineType = cv2.LINE_AA,
+                        bottomLeftOrigin = False)
 
     def close(self):
         if self.is_debug:

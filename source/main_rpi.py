@@ -32,8 +32,8 @@ def main():
         while True:
             start_time = time.time()
 
-            line_shift = image_processor.get_line_shift()
-            chassis_controller.change_direction(line_shift)
+            error = image_processor.get_line_shift()
+            chassis_controller.change_direction(error)
 
             end_time = time.time()
             duration = round(end_time - start_time, 2)
