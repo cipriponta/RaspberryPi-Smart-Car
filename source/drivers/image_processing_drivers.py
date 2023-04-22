@@ -401,7 +401,7 @@ class ImageProcessor:
             Point.draw_polynomial(self.right_line_points, output_frame, IMAGE_SLIDING_WINDOW_RIGHT_LINE_COLOR)
             Point.draw_polynomial(self.middle_line_points, output_frame, IMAGE_SLIDING_WINDOW_MIDDLE_LINE_COLOR)
 
-        if IMAGE_DISPLAY_ERROR_VALUE:
+        if IMAGE_DISPLAY_STATS:
             cv2.rectangle(img = output_frame,
                           pt1 = IMAGE_LINE_ERROR_RECT_COORDS_STARTING_POINT,
                           pt2 = IMAGE_LINE_ERROR_RECT_COORDS_ENDING_POINT,
