@@ -313,19 +313,6 @@ class ImageProcessor:
         self.get_middle_line()
         self.calculate_error()
 
-        if self.is_debug:
-            if IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.COLOR:
-                self.output_frame = self.frame
-            elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.GREYSCALE:
-                self.output_frame = cv2.cvtColor(self.greyscale_frame, cv2.COLOR_GRAY2BGR)
-            elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.BLURRED:
-                self.output_frame = cv2.cvtColor(self.blurred_frame, cv2.COLOR_GRAY2BGR)
-            elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.THRESHOLDED:
-                self.output_frame = cv2.cvtColor(self.thresholded_frame, cv2.COLOR_GRAY2BGR)
-
-            self.draw(self.output_frame)
-            self.video_streamer.send_frame(self.output_frame)
-
         return self.error
 
     def get_contours(self):
@@ -391,7 +378,21 @@ class ImageProcessor:
                          IMAGE_SLIDING_WINDOW_BIASES[point_count]
         return self.error
 
-    def draw(self, output_frame):
+    def send_frame(self, pid_output, left_motor_duty_cycle, right_motor_duty_cycle):
+        if self.is_debug:
+            if IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.COLOR:
+                self.output_frame = self.frame
+            elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.GREYSCALE:
+                self.output_frame = cv2.cvtColor(self.greyscale_frame, cv2.COLOR_GRAY2BGR)
+            elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.BLURRED:
+                self.output_frame = cv2.cvtColor(self.blurred_frame, cv2.COLOR_GRAY2BGR)
+            elif IMAGE_OUTPUT_FRAME == IMAGE_OUTPUT.THRESHOLDED:
+                self.output_frame = cv2.cvtColor(self.thresholded_frame, cv2.COLOR_GRAY2BGR)
+
+            self.draw(self.output_frame, pid_output, left_motor_duty_cycle, right_motor_duty_cycle)
+            self.video_streamer.send_frame(self.output_frame)
+
+    def draw(self, output_frame, pid_output, left_motor_duty_cycle, right_motor_duty_cycle):
         for contour in self.processed_contours:
             contour.draw(output_frame)
 
@@ -403,22 +404,52 @@ class ImageProcessor:
 
         if IMAGE_DISPLAY_STATS:
             cv2.rectangle(img = output_frame,
-                          pt1 = IMAGE_LINE_ERROR_RECT_COORDS_STARTING_POINT,
-                          pt2 = IMAGE_LINE_ERROR_RECT_COORDS_ENDING_POINT,
-                          color = IMAGE_LINE_ERROR_RECT_COLOR,
+                          pt1 = IMAGE_STATS_RECT_COORDS_STARTING_POINT,
+                          pt2 = IMAGE_STATS_RECT_COORDS_ENDING_POINT,
+                          color = IMAGE_STATS_RECT_COLOR,
                           thickness = -1)
+            
             cv2.putText(img = output_frame,
-                        text = f"{self.error}",
-                        org = IMAGE_LINE_ERROR_RECT_COORDS_STARTING_POINT,
+                        text = f"{self.error:.2f}",
+                        org = IMAGE_STATS_LINE_ERROR_COORDS_STARTING_POINT,
                         fontFace = cv2.FONT_HERSHEY_SIMPLEX,
-                        fontScale = IMAGE_LINE_ERROR_TEXT_FONT_SIZE,
-                        color = IMAGE_LINE_ERROR_TEXT_COLOR,
-                        thickness = IMAGE_LINE_ERROR_TEXT_THICKNESS,
+                        fontScale = IMAGE_STATS_FONT_SIZE,
+                        color = IMAGE_STATS_TEXT_COLOR,
+                        thickness = IMAGE_STATS_TEXT_THICKNESS,
+                        lineType = cv2.LINE_AA,
+                        bottomLeftOrigin = False)
+            
+            cv2.putText(img = output_frame,
+                        text = f"{pid_output:.2f}",
+                        org = IMAGE_STATS_PID_OUTPUT_COORDS_STARTING_POINT,
+                        fontFace = cv2.FONT_HERSHEY_SIMPLEX,
+                        fontScale = IMAGE_STATS_FONT_SIZE,
+                        color = IMAGE_STATS_TEXT_COLOR,
+                        thickness = IMAGE_STATS_TEXT_THICKNESS,
+                        lineType = cv2.LINE_AA,
+                        bottomLeftOrigin = False)
+            
+            cv2.putText(img = output_frame,
+                        text = f"{left_motor_duty_cycle:.2f}",
+                        org = IMAGE_STATS_LEFT_MOTOR_DC_COORDS_STARTING_POINT,
+                        fontFace = cv2.FONT_HERSHEY_SIMPLEX,
+                        fontScale = IMAGE_STATS_FONT_SIZE,
+                        color = IMAGE_STATS_TEXT_COLOR,
+                        thickness = IMAGE_STATS_TEXT_THICKNESS,
+                        lineType = cv2.LINE_AA,
+                        bottomLeftOrigin = False)
+            
+            cv2.putText(img = output_frame,
+                        text = f"{right_motor_duty_cycle:.2f}",
+                        org = IMAGE_STATS_RIGHT_MOTOR_DC_COORDS_STARTING_POINT,
+                        fontFace = cv2.FONT_HERSHEY_SIMPLEX,
+                        fontScale = IMAGE_STATS_FONT_SIZE,
+                        color = IMAGE_STATS_TEXT_COLOR,
+                        thickness = IMAGE_STATS_TEXT_THICKNESS,
                         lineType = cv2.LINE_AA,
                         bottomLeftOrigin = False)
 
     def close(self):
         if self.is_debug:
             self.video_streamer.close()
-        
         
