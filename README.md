@@ -22,7 +22,9 @@
 - [X] Setup the python debugger for VSCode
 - [X] Create a new track layout that is the size of 2 A0 sheets
 - [X] Implement the sliding window approach for the Lane Detection 
-- [ ] Tune the PID Controller
+- [X] Tune the PID Controller
+- [ ] Create a Demo for the Thesis
+- [ ] Write the Thesis
 
 #### Optional
 - [ ] Try to create timer interrupts
