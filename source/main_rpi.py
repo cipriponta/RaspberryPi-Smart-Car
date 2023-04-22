@@ -34,12 +34,15 @@ def main():
 
             error = image_processor.get_line_shift()
             chassis_controller.change_direction(error)
-
-            end_time = time.time()
-            duration = round(end_time - start_time, 2)
+            
             if is_debug:
-                print("Process duration: {:.2f}".format(duration), end='\t')
-                print("Pid stats: ", chassis_controller.get_stats())
+                image_processor.send_frame(pid_output = chassis_controller.output,
+                                           left_motor_duty_cycle = chassis_controller.left_motor_duty_cycle,
+                                           right_motor_duty_cycle = chassis_controller.right_motor_duty_cycle)
+                end_time = time.time()
+                duration = round(end_time - start_time, 2)
+                print(f"Process duration: {duration:.2f}", end='\t')
+                print("Pid stats: ", chassis_controller)
 
     except (BrokenPipeError, ConnectionResetError):
         print("The connection has been closed by the client")
