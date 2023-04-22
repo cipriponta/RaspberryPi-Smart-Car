@@ -19,6 +19,14 @@ class ChassisDriver():
 
         self.GPIO_init()
 
+    def __repr__(self):
+        return f"Error: {self.error:.2f}\t" \
+               f"Error Sum: {self.error_sum:.2f}\t" \
+               f"Derivative: {self.derivative:.2f}\t\t" \
+               f"Output: {self.output:.2f}\t" \
+               f"Left DC: {self.left_motor_duty_cycle}\t" \
+               f"Right DC: {self.right_motor_duty_cycle}\t"
+
     def GPIO_init(self):
         RPi.GPIO.setmode(RPi.GPIO.BOARD)
         RPi.GPIO.setwarnings(False)
@@ -66,14 +74,6 @@ class ChassisDriver():
             self.right_motor_duty_cycle = 0
         elif self.right_motor_duty_cycle > MOTOR_PWM_NORMAL_DUTY_CYCLE:
             self.right_motor_duty_cycle = MOTOR_PWM_NORMAL_DUTY_CYCLE
-
-    def get_stats(self):
-        return f"Error: {self.error:.2f}\t" \
-               f"Error Sum: {self.error_sum:.2f}\t" \
-               f"Derivative: {self.derivative:.2f}\t\t" \
-               f"Output: {self.output:.2f}\t" \
-               f"Left DC: {self.left_motor_duty_cycle}\t" \
-               f"Right DC: {self.right_motor_duty_cycle}\t"
 
     def close(self):
         self.left_motor_pwm.stop()

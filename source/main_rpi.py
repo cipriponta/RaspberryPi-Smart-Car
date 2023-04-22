@@ -39,7 +39,7 @@ def main():
             duration = round(end_time - start_time, 2)
             if is_debug:
                 print("Process duration: {:.2f}".format(duration), end='\t')
-                print("Pid stats: ", chassis_controller.get_stats())
+                print("Pid stats: ", chassis_controller)
 
     except (BrokenPipeError, ConnectionResetError):
         print("The connection has been closed by the client")
