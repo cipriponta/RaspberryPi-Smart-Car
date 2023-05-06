@@ -89,7 +89,8 @@ class Line:
             else:
                 return False
         except ZeroDivisionError:
-            return False
+            # If we get the ZeroDivisionError it means that we have points that are on a straight line
+            return True
 
     def draw(self, output_image):
         cv2.arrowedLine(img = output_image,
@@ -319,7 +320,7 @@ class ImageProcessor:
         self.greyscale_frame = cv2.cvtColor(src = self.frame, 
                                             code = cv2.COLOR_BGR2GRAY)
         self.blurred_frame = IMAGE_THRESHOLD_BLUR_METHOD(src =  self.greyscale_frame,
-                                                         ksize = (IMAGE_THRESHOLD_BLOCK_SIZE, IMAGE_THRESHOLD_BLOCK_SIZE),
+                                                         ksize = (IMAGE_BLUR_BLOCK_SIZE, IMAGE_BLUR_BLOCK_SIZE),
                                                          sigmaX = IMAGE_THRESHOLD_SIGMA_X)
         self.thresholded_frame = cv2.adaptiveThreshold(src = self.blurred_frame,
                                                        maxValue = IMAGE_GREYSCALE_MAX_VALUE,
