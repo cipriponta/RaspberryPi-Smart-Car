@@ -13,4 +13,4 @@ How to run:
 - Connect to Raspberry Pi via SSH, cd to this repository and run: python source/main_rpi.py (optional: --debug --stand).
 - Connect to another machine in order to view the processed output, cd to this repository and run: python source/main_pc.py.
 
-Video Demo: 
+Video Demo: https://www.youtube.com/watch?v=zEGgocpqRnU
